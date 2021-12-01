@@ -23,17 +23,26 @@ knitr::opts_chunk$set(
 ### Packages Used
 
 ```{r loadpackages}
-
+library(tidyverse)
+if (!require("DT")) install.packages("DT")
+library(DT)
+libr
 ```
 
 ### Datasets Used
 
 ```{r loaddatamain}
+data_main <- read_csv("https://raw.githubusercontent.com/STAT-JET-ASU/Datasets/master/Instructor/galtonfamiliesmain.csv")#)
 
+glimpse(data_main)
+str(data_main)
+typeof(data_main)
 ```
 
 ```{r loaddatasub}
+data_sub <- read_csv("https://raw.githubusercontent.com/STAT-JET-ASU/Datasets/master/Instructor/galtonfamiliessub.csv")
 
+glimpse(data_sub)
 ```
 
 ### Collaborators
@@ -70,6 +79,51 @@ Load the `galtonfamiliesmain.csv` and `galtonfamiliessub.csv` datasets above und
 
 ```{r assembledata1}
 
+# Prepare data_sub to match data_main
+data_sub <- data_sub %>%
+   mutate(Father = FatherR + 60,
+          Mother = MotherR + 60,
+          Height = HeightR + 60) %>%
+   select(FamilyID, Children, Father, Mother, Child, Height)
+data_sub$FamilyID <- as.character(data_sub$FamilyID)
+
+# Join data_sub and data_main
+data_fams <- bind_rows(data_main, data_sub) %>%
+   
+   # Wrangle combined data_fams
+      # ... For `rename()`: `<tidy-select>` Use `new_name = old_name`
+   rename(
+      num_children = Children,
+      father_ht = Father
+   ) %>%
+   mutate(
+      familyid = replace(FamilyID, FamilyID == "136A", "205"),
+      familyid = as.double(familyid),
+      mother_ht = (1.08 * Mother),
+      midparent = (mother_ht + father_ht) / 2,
+      child_sex = ifelse(Child == "Daughter",
+                        "daughter",
+                        "son"),
+      child_ht = ifelse(child_sex == "daughter",
+                        1.08 * Height,
+                        Height)
+   ) %>%
+   select(
+      familyid,
+      num_children,
+      father_ht,
+      mother_ht,
+      midparent,
+      child_sex,
+      child_ht,
+   ) %>%
+   arrange(desc(child_ht)) %>%
+   group_by(familyid) %>%
+   arrange(desc(child_ht, by_group = TRUE)) %>%
+   arrange(familyid)
+
+datatable(data_fams)
+#str(data_fams)
 ```
 
 #### Dataset #2
@@ -78,6 +132,9 @@ Select the variables `familyid` and `num_children` and reduce the dataset so tha
 
 ```{r assembledata2}
 
+family_count <- select(data_fams, familyid, num_children) %>% distinct()
+
+datatable(family_count)
 ```
 
 ### Part 1: Parent/Child Heights
@@ -107,7 +164,33 @@ Also include the following.
 * use `theme()` to move the legend to the bottom of the scatterplot
 
 ```{r updatedscatterplot1}
-
+ggplot(data_fams, aes(child_ht, midparent, color = child_sex)) +
+   geom_point(
+      alpha = 0.3,
+      size = 2
+   ) +
+   scale_color_manual(
+      breaks = c("daughter", "son"),
+      values = c("lightseagreen", "violetred4")
+   ) +
+   scale_x_continuous(n.breaks = 20) +
+   scale_y_continuous(n.breaks = 11) +
+   coord_fixed() +
+   theme_linedraw() +
+   theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5),
+      legend.position = "bottom"
+   ) +
+   labs(
+      title = "Heritability of Being Tall", 
+      subtitle = "Gender-adjusted heights of offspring in relation to that of the parents",
+      color = "Gender of Child",
+      x = "Height of Adult Child (Inches)",
+      y = "Average Height of Parents (Inches)"
+   )
+   
+   
 ```
 
 #### Updated Scatterplot #2
@@ -115,7 +198,34 @@ Also include the following.
 Remove the color coding for sons versus daughters from your plot, as well as any other coding related to it. Instead, choose n single color for the points and adjust both `size` and transparency (`alpha`) as needed to correct for overplotting and help show the density of points. Reset the `aes` so child height is the `y` variable and midparent height is the `x` variable. Add a fitted *straight* line to the plot. Update your `labs` accordingly.
 
 ```{r updatedscatterplot2}
+ggplot(data_fams, aes(midparent, child_ht)) +
+   geom_point(
+      alpha = 0.2,
+      size = 1.8,
+      color = "steelblue"
+   ) +
+   scale_x_continuous(n.breaks = 11) +
+   scale_y_continuous(n.breaks = 20) +
+   theme_linedraw() +
+   theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5)
+   ) +
+   labs(
+      title = "Heritability of Being Tall", 
+      subtitle = "Gender-adjusted heights of offspring in relation to that of the parents",
+      x = "Average Height of Parents (Inches)",
+      y = "Height of Adult Child (Inches)"
+   ) +
+   geom_smooth(
+      method = "lm", 
+      formula = "y ~ x", 
+      se = FALSE,
+      color = "grey25",
+      size = 0.4) +
+   coord_fixed()
 
+   
 ```
 
 ### Part 2: Number of Children
@@ -123,7 +233,23 @@ Remove the color coding for sons versus daughters from your plot, as well as any
 Create a barplot to show the distribution of the number of children per family. Set the bars to something other than the default `width`. Scale the x-axis so that there is a tick mark for each bar. Choose appropriate colors, labels, themes, and/or and other types of formatting that you feel will enhance the meaning or visual appearance of the plot.
 
 ```{r childrenbarplot}
-
+ggplot(family_count, aes(num_children)) +
+   geom_bar(
+      color = "red",
+      fill = "red4",
+      width = 0.9,
+      xlim = c(1, 15),
+      ylim = c(0, 32)
+   ) +
+   scale_x_continuous(n.breaks = 20, minor_breaks = NULL, expand = c(0, 0), limits = c(0, 20)) +
+   scale_y_continuous(n.breaks = 7, minor_breaks = c(0:35), expand = c(0, 0), limits = c(0, 35)) +
+   theme_linedraw() +
+   theme(plot.title = element_text(hjust = 0.5)) +
+   labs(
+      title = "Number of Children per Family in Glaton Study Participants",
+      x = "Number of Children in Family",
+      y = "Number of Families With x Many Children"
+   )
 ```
 
 ## Questions
