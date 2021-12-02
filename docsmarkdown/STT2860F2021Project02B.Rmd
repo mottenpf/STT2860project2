@@ -23,13 +23,19 @@ knitr::opts_chunk$set(
 ### Packages Used
 
 ```{r loadpackages}
+library(tidyverse)
 
 ```
 
 ### Datasets Used
 
 ```{r Rdatafile}
- 
+load("../dataprocessed/streamingcontent.Rdata")
+
+glimpse(dplus)
+glimpse(strmtv)
+glimpse(strmtv_long)
+
 ```
 
 ### Collaborators
