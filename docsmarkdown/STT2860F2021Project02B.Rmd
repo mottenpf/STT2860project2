@@ -24,7 +24,8 @@ knitr::opts_chunk$set(
 
 ```{r loadpackages}
 library(tidyverse)
-
+if(!require("waffle")){install.packages("waffle")}
+library(waffle)
 ```
 
 ### Datasets Used
@@ -40,7 +41,7 @@ glimpse(strmtv_long)
 
 ### Collaborators
 
-ADD NAMES HERE OR WRITE "None"
+None :_(
 
 <hr>
 
@@ -59,7 +60,13 @@ Complete and run the two scripts found in the `docscripts` folder. Your processe
 The `dplus` dataset contains a variable that gives information about the `rating` for each program offering. Convert the variable into a factor that puts the ratings in (roughly) ascending order of age restriction/audience: `TV-Y`, `TV-Y7`, `TV-Y7-FV`, `TV-G`, `G`, `TV-PG`, `PG`, `PG-13`, `TV-14`. If the `date_added` variable is not already in date format, convert it.  
 
 ```{r factorratings}
+dplus$rating <- factor(
+  dplus$rating, 
+  levels = c("TV-Y", "TV-Y7", "TV-Y7-FV", "TV-G", "G", "TV-PG", "PG", "PG-13", "TV-14"), 
+  ordered = TRUE
+)
 
+#class(dplus$date_added)
 ```
 
 #### Dataset #2
@@ -67,7 +74,10 @@ The `dplus` dataset contains a variable that gives information about the `rating
 In the `strmtv` dataset, create a new variable that tells you the total number of streaming services that offer each included program.
 
 ```{r numberofsvcs}
-
+strmtv %>%
+  mutate(
+    num_svcs = Netflix + Hulu + `Prime Video`+ `Disney+`
+  )
 ```
 
 ### Part 1: Violin Plot
@@ -75,7 +85,21 @@ In the `strmtv` dataset, create a new variable that tells you the total number o
 Create a violin plot of `release_year` (x-axis) grouped by `type` of program (y-axis) for programs on Disney+. Fill with a color of your choice. Add a boxplot inside the violin plot, as you did in one of the DataCamp exercises. Re-scale the x-axis so that tick marks appear at whole-decade intervals (e.g., 1980, 1990, 2000). Add an appropriate title and axis labels. Use other formatting as you choose to enhance effectiveness/appearance.
 
 ```{r}
-
+ggplot(dplus, aes(release_year, type)) +
+  geom_violin(bw = 1.5, fill = "purple1") +
+  geom_boxplot(alpha = 0, fill = "transparent") +
+  scale_x_continuous(n.breaks = 10) +
+   theme_linedraw() +
+   theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5)
+   ) +
+   labs(
+      title = "Number of Programs Released by Year", 
+      x = "Year Released",
+      y = NULL
+   )
+  
 ```
 
 ### Part 2: Waffle Plot
@@ -93,7 +117,14 @@ Create a waffle plot to show the distribution of program `type` on Disney+.
 Hint: You can use `count()` to find out how many of each `type` of program there is, then use `prop.table(n)` in a mutate statement (along with some other math) to get percentages. Other methods are also possible.
 
 ```{r}
+prog_counts <- dplus %>%
+  count(type) %>%
+  mutate(percent_type = round(n / length(dplus$type) * 100))
 
+prog_percent <- prog_counts$percent_type
+names(prog_percent) <- prog_counts$type
+
+waffle(prog_percent, colors = c("tan4", "goldenrod1"))
 ```
 
 ### Part 3: Bar Plot
