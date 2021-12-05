@@ -124,7 +124,11 @@ prog_counts <- dplus %>%
 prog_percent <- prog_counts$percent_type
 names(prog_percent) <- prog_counts$type
 
-waffle(prog_percent, colors = c("tan4", "goldenrod1"))
+waffle(
+  prog_percent, 
+  colors = c("tan4", "goldenrod1"),
+  xlab = paste("Each square represents approximately ", round(length(dplus$type) / 100), " programs", sep = ""),
+  title = "Streaming Content on Disney+")
 ```
 
 ### Part 3: Bar Plot
@@ -132,6 +136,20 @@ waffle(prog_percent, colors = c("tan4", "goldenrod1"))
 Create a horizontal barplot to show the frequencies of the various `rating` categories for programs on Disney+ (i.e., use `y =` rather than `x =` for the variable you are plotting). You will need to remove a couple `NA` values first. Use faceting by `type` so that you have side-by-side plots for the different program types. Add an appropriate title and axis labels, as well as other formatting of your choice to enhance effectiveness/appearance. 
 
 ```{r}
+rating_clean <- dplus %>%
+  drop_na(rating)
+
+ggplot(rating_clean, aes(rating)) +
+  geom_bar(color = "deepskyblue3",
+           fill = "deepskyblue4",) +
+  coord_flip() +
+  facet_wrap( ~ type) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(panel.background = element_rect(fill = "lavender"),
+        strip.background = element_rect(fill = "lavenderblush3")) +
+  labs(title = "Ratings of Programs on Disney+",
+       x = "Program Rating",
+       y = "Number of Programs",)
 
 ```
 
@@ -140,6 +158,41 @@ Create a horizontal barplot to show the frequencies of the various `rating` cate
 Use one of the sets that contains data about the TV shows available on various streaming services to compare the quantity of Disney's TV show offerings to the quantity of offerings on other streaming services. Use a plot of your choice to enhance the effectiveness/appearance of the plot.
 
 ```{r}
+
+#
+# ###  Compare the QUALITY of Disney+ to other offerings
+
+strmtv_num <- strmtv_long %>%
+  mutate(
+    Rotten = as.numeric(sub(x = strmtv_long$`Rotten Tomatoes`, "/.*", "")),
+    IMDb_num = ifelse(is.na(IMDb), NA, as.numeric(sub(x = strmtv_long$IMDb, "/.*", "")) * 10),
+    Critics = ifelse(is.na(IMDb), Rotten, (Rotten + IMDb_num) / 2)
+  )
+
+ggplot(strmtv_num, aes(Service, Critics, fill = Service)) +
+  geom_violin(bw = 2, scale = "count") +
+  scale_fill_manual(
+      breaks = c("Disney+", "Hulu", "Netflix", "Prime Video"),
+      values = c("darkorchid2", "green3", "firebrick2", "dodgerblue")) +
+  scale_y_continuous(
+    n.breaks = 5, 
+    minor_breaks = seq(0, 100, 5),
+    limits = c(0, 100)) +
+  labs(title = "Quality of TV Shows on Selected Streaming Services",
+       x = "Number of Programs (width of plot)",
+       y = "Average % Positive Critical Reviews")
+#
+# ###  Compare the QUANTITY of Disney+ to other offerings
+
+ggplot(strmtv_long, aes(Service, fill = Service)) +
+  geom_bar() +
+  scale_fill_manual(
+      breaks = c("Disney+", "Hulu", "Netflix", "Prime Video"),
+      values = c("darkorchid2", "green3", "firebrick2", "dodgerblue")) +
+  labs(title = "Number of TV Shows on Selected Streaming Services",
+       x = NULL,
+       y = "Number of Programs")
+
 
 ```
 
@@ -157,7 +210,7 @@ Use one of the sets that contains data about the TV shows available on various s
 
 4)
 
-5)
+5)  Prime video has almost as many offerings with only 10-20% positive reviews as Disney + has in their entire tv catalog.
 
 **Question 2:** What other data would you like to have, or which existing variables would you like to see transformed, if you were going to do further explorations or visualizations? Give at least two examples.
 
