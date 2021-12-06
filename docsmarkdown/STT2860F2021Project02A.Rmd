@@ -171,7 +171,7 @@ ggplot(data_fams, aes(child_ht, midparent, color = child_sex)) +
    ) +
    scale_color_manual(
       breaks = c("daughter", "son"),
-      values = c("lightseagreen", "violetred4")
+      values = c("lightseagreen", "mediumvioletred")
    ) +
    scale_x_continuous(n.breaks = 20) +
    scale_y_continuous(n.breaks = 11) +
@@ -258,19 +258,21 @@ ggplot(family_count, aes(num_children)) +
 
 **ANSWER**
 
-ERASE THIS TEXT AND ANSWER QUESTION HERE
+At a glance, it's a little bit easier to see the data on the scatterplots than in Galton's.  The Galton plot contains essentially the same information, but requires closer examination to read the density in each grid square.  Galton's plot contains more information with the axes being in both absolute scales and deviations, but in some ways this simply makes the graphic more complicated and distracts from the core data.  It's not clear from looking at Galton's ploth what the major/minor axes and tangeltl lines are meant to represent.  It might be helpful for my plot to include a labeled y = x line which would show the trend if children were (on average) the same height as their parents.  The difference between the trend line and the y = x line would illustrate the regression coefficient:  children of short parents are taller than one might initially expect, while children of tall parents tend to be shorter.
 
 **Question 2:** Explain the rationale behind the choices you made when creating your scatterplots and barplot, such as size, color, transparency, or other features. What motivated your decisions? 
 
 **ANSWER**
 
-ERASE THIS TEXT AND ANSWER QUESTION HERE
+When selecting transparency for the first scatterplot, I wanted to pick a value that would be dark enough to see single points easily, but allow at least three overplotted points to be discernable.  A value of 0.3 means that more than 3 points make the mark entirely opaque, but it's possible to tell the difference between one or two or three or more.  For selecting colors, I decided not to use pink and blue, although the stereotype associated with that color choice has advantages.  Ultimately I selected a purple-and-green palette based on the suggestions from <a href="https://blog.datawrapper.de/gendercolor/">this article</a>, and these colors should be differentiable with most forms of color blindness.  If the sex of the child were particularly important to the meaning of the graph, a different shape could be used as well, making the plot entirely color-independent.  
+
+I chose bright colors for the second scatterplot and bar plot because bright colors naturally draw the eye.  I tried to make the axis labels descriptive enough that no additional information would be needed to understand what was being conveyed.  For the bar chart, I set the minor grid lines on the y-axis to be every 1 family, because the "x-axis"number of families" is inherently an integer value, and having grid lines every 2.5 units (or other awkward or un-intuitive units, like 1/10ths of a foot) is one of my pet peeves, and makes it needlessly harder to read the data.
 
 **Question 3:** Considering best practices, how does using `coord_fixed()` enhance the authenticity of the information shown in the scatterplots, such as the relationship and spread of the data?
 
 **ANSWER**
 
-ERASE THIS TEXT AND ANSWER QUESTION HERE
+Both axes are in the same units, and viewers will intuit (and/or assume) that the scales are the same.  Using `coord_fixed()` makes sure that an inch on the y-axis is the same as an inch on the x-axis, which prevents the trend line from being distorted by stretching the axes to fit a standard rectangular view, and makes it easy to see the elliptical clustering of the data.  If the minor axis (y-axis in the first plot) were stretched out, the distribution would appear more circular, i.e., completely random around a central point.
 
 ***
 ```{r}
