@@ -1,6 +1,6 @@
 ---
 title: "Project 2B: Disney+ Data"
-author: "PUT YOUR NAME HERE"
+author: "Paul Motten"
 date: '`r format(Sys.time(), "%A, %B %d, %Y @ %I:%M %p")`'
 output: 
   html_document: 
