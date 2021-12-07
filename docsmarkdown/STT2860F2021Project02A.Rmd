@@ -91,7 +91,6 @@ data_sub$FamilyID <- as.character(data_sub$FamilyID)
 data_fams <- bind_rows(data_main, data_sub) %>%
    
    # Wrangle combined data_fams
-      # ... For `rename()`: `<tidy-select>` Use `new_name = old_name`
    rename(
       num_children = Children,
       father_ht = Father
@@ -123,7 +122,6 @@ data_fams <- bind_rows(data_main, data_sub) %>%
    arrange(familyid)
 
 datatable(data_fams)
-#str(data_fams)
 ```
 
 #### Dataset #2

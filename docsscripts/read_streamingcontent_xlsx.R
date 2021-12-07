@@ -3,7 +3,8 @@
 # original data is in the raw folder, new in the processed folder
 if (!require("readxl")) install.packages("readxl")
 library(readxl)
-dir.create("dataprocessed")
+
+#dir.create("dataprocessed")
 
 # view the names of the worksheets that are in streamingcontent.xlsx
 
@@ -39,3 +40,4 @@ write_rds(
 # write the datasets to an .Rdata file called streamingcontent.Rdata
 
 save(dplus, strmtv, file = "dataprocessed/streamingcontent.Rdata")
+

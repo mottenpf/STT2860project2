@@ -1,0 +1,288 @@
+---
+title: "Project 2D: Appendices"
+author: "Paul Motten"
+date: '`r format(Sys.time(), "%A, %B %d, %Y @ %I:%M %p")`'
+output: 
+  html_document: 
+    theme: cosmo
+    highlight: textmate
+    code_folding: hide
+---
+
+## Packages Used
+
+```{r loadpackages, collapse = TRUE}
+library(tidyverse)
+library(maps)
+library(knitr)
+if (!require("gganimate")) install.packages("gganimate")
+library(gganimate)
+if (!require("transformr")) install.packages("transformr")
+library(transformr)
+if (!require("ggbeeswarm")) install.packages("ggbeeswarm")
+library(ggbeeswarm)
+if (!require("plotly")) install.packages("plotly")
+library(plotly)
+if (!require("kableExtra")) install.packages("kableExtra")
+library(kableExtra)
+if (!require("DT")) install.packages("DT")
+library(DT)
+if(!require("waffle")){install.packages("waffle")}
+library(waffle)
+```
+
+## Appendix A
+
+###   Notes
+
+ ... For `rename()`: `<tidy-select>` Use `new_name = old_name`
+
+ ... `ifelse()` args:  `(test, yes, no)`
+
+
+## Appendix B
+
+```{r}
+
+#
+# ###  Compare the QUALITY of Disney+ to other offerings
+
+strmtv_num <- strmtv_long %>%
+  mutate(
+    Rotten = as.numeric(sub(x = strmtv_long$`Rotten Tomatoes`, "/.*", "")),
+    IMDb_num = ifelse(is.na(IMDb), NA, as.numeric(sub(x = strmtv_long$IMDb, "/.*", "")) * 10),
+    Critics = ifelse(is.na(IMDb), Rotten, (Rotten + IMDb_num) / 2)
+  )
+
+ggplot(strmtv_num, aes(Service, Critics, fill = Service)) +
+  geom_violin(bw = 2, scale = "count") +
+  scale_fill_manual(
+      breaks = c("Disney+", "Hulu", "Netflix", "Prime Video"),
+      values = c("darkorchid2", "green3", "firebrick2", "dodgerblue")) +
+  scale_y_continuous(
+    n.breaks = 5, 
+    minor_breaks = seq(0, 100, 5),
+    limits = c(0, 100)) +
+  labs(title = "Quality of TV Shows on Selected Streaming Services",
+       x = "Number of Programs (width of plot)",
+       y = "Average % Positive Critical Reviews")
+
+```
+
+## Appendix C
+
+```{r loaddata, collapse = TRUE}
+bills <- read_csv("../dataraw/billionaires_2021_10_31.csv")
+
+glimpse(bills)
+is_tibble(bills)
+
+ipeds <- read_csv("https://assets.datacamp.com/production/repositories/1942/datasets/18a000cf70d2fe999c6a6f2b28a7dc9813730e74/ipeds.csv")
+glimpse(ipeds)
+
+teen <- readRDS("../dataprocessed/CDCteenbirthrate.rds")
+str(teen)
+
+teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
+  mutate(subregion = tolower(county), # to match county map data
+         year = as.integer(year)) # to make the animation labels whole numbers
+str(teenNC)
+
+### County Data from Maps Package
+countymapNC <- map_data("county") %>% 
+  filter(region == "north carolina") %>% 
+  select(-region) # not needed since it will be all NC data now
+str(countymapNC)
+
+```
+
+```{r exploration, collapse = TRUE}
+
+# bills[bills == "$121B"] <- NA  # Check that is.na check is checking correctly.  
+#   ###
+#   ###  Re-run read_cvs to refresh dataframe after testing
+#   ###
+#
+for (i in 1:ncol(bills)) {
+  print(which(is.na(bills[ ,i])))
+}
+
+ggplot(bills, aes(LastChange_Bil, Total_Net_Worth_Bil, color = Industry)) +
+    geom_point() +
+    scale_x_continuous(trans = "log2") +
+    scale_y_continuous(trans = "log2")
+
+bills_ex <- bills %>%
+  group_by(Industry) %>%
+  summarise(Sum = sum(Total_Net_Worth_Bil))
+
+bills_red <- bills %>%
+  mutate(
+    Industry = ifelse(
+        bills$Industry == "Technology" |
+        bills$Industry == "Industrial" |
+        bills$Industry == "Finance" |
+        bills$Industry == "Diversified"|
+        bills$Industry == "Consumer",
+      Industry,
+      "Other"),
+    LastChange_Prop = (LastChange_Bil + Total_Net_Worth_Bil) / Total_Net_Worth_Bil,
+    LastChange_Coef = (LastChange_Bil + mean(Total_Net_Worth_Bil)) / mean(Total_Net_Worth_Bil)
+  ) %>%
+  rename(`Net Worth (Billions)` = Total_Net_Worth_Bil,
+         `Change YTD` =  YTDChange_Bil)
+glimpse(bills_red)
+
+bills_rex <- bills_red %>%
+  group_by(Industry) %>%
+  summarise(Sum = sum(`Net Worth (Billions)`))
+
+```
+
+```{r exploratory plotting}
+
+
+ggplot(bills_red, aes(x = Industry, fill = Industry)) +
+    geom_bar()
+
+ggplot(bills, aes(x = Industry, fill = Industry)) +
+    geom_bar() +
+    coord_flip()
+
+ggplot(bills_ex, aes(Industry, Sum, fill = Industry)) +
+    stat_summary(geom="bar", position = "stack") +
+    xlab("Sector") +
+    coord_flip()
+
+ggplot(bills_rex, aes(Industry, Sum, fill = Industry)) +
+    stat_summary(geom="bar", position = "stack") +
+    xlab("Sector")
+
+#
+##  ***** Non-functional code, do not use ******
+##  plot(bills, aes(LastChange_Bil, Total_Net_Worth_Bil, color = Country)) +
+#     geom_point() +
+#     scale_x_continuous(n.breaks = 10) +
+#     scale_y_continuous(n.breaks = 10)
+#
+
+
+```
+```{r}
+
+jitter <- position_jitter(width = 0.2, height = 0, seed = 5)
+
+ggplot(bills_red,
+       aes(
+         x = 1,
+         y = LastChange_Prop,
+         color = Industry,
+         size =  `Net Worth (Billions)`
+       )) +
+  geom_point(position = jitter, alpha = 0.8) +
+  scale_size(range = c(0, 20)) +
+  theme(title = element_text("YTD Change in wealth relative to current fortune"))
+
+ggplot(bills_red,
+       aes(
+         x = 1,
+         y = LastChange_Coef,
+         color = Industry,
+         size =  `Net Worth (Billions)`
+       )) +
+  geom_point(position = jitter) +
+  scale_size(range = c(0, 20)) +
+  theme(title = element_text("Absolute change in wealth YTD"))
+
+
+```
+
+
+```{r teendelta}
+
+teenNC_wide <- teenNC %>%
+  select(-c("LCL", "UCL")) %>%
+  pivot_wider(names_from = year, names_prefix = "births_", values_from = birth_rate) %>%
+  mutate(births_delta = births_2018 - births_2003,
+         birth_incr = ifelse(births_delta >= 0, births_delta, NA))
+  
+```
+
+```{r mapjoin} 
+mapdata <- countymapNC %>% 
+  full_join(teenNC_wide, by = "subregion")
+```
+
+```{r}
+ipedsNC <- ipeds %>%
+  filter (
+    lat < 36.5,
+    lng < -75.554359,
+    lat > 33.888967,
+    lng > -84.321449,
+    sector_label == "Public"
+  )
+
+print(ipedsNC)
+```
+
+```{r}
+mapdata %>%
+#  filter(year == "2003") %>%                       fill = birth_rate),
+   ggplot() +
+   geom_polygon(aes(x = long, 
+                    y = lat, 
+                    group = group, 
+                    fill = births_delta),
+                color = "black") +
+  coord_map() +
+  scale_fill_gradient2(low = "green", mid = "white", high = "red", midpoint = 0) +
+  geom_point(data = ipedsNC, 
+             aes(lng, lat, color = "Location of UNC Campuses"),
+             size = 1.5) +
+    theme(plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5)) +
+    scale_colour_manual(values = "black", na.value = "black") +
+    labs(title = "Change in Teen Birth Rates in North Carolina",
+         subtitle = "From 2003 to 2018, per 1,000 females in age group 15–19 years",     #
+         fill = "Teen Birth Rate",
+         color = NULL,
+         caption = "Data Source: Centers for Disease Control and Prevention") 
+
+```
+
+
+```{r}
+teen_vis <- teen %>%
+  filter(state == "North Carolina",
+         county == "Watauga")
+
+ggplot(teen_vis, aes(year, birth_rate)) +
+    stat_smooth(alpha = 0.2) +
+  geom_line() +
+  scale_y_continuous(limits = c(0, 12)) +
+  labs(title = "Change in Teen Birth Rates",
+       subtitle = "per 1,000 females in age group 15–19 years",
+       caption = "Data Source: Centers for Disease Control and Prevention") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+teen_vis2 <- teen %>%
+  filter(state == "North Carolina") %>%
+  group_by(county)
+
+ggplot(teen_vis2, aes(year, birth_rate, color = county)) +
+  geom_line() +
+  labs(title = "Change in Teen Birth Rates",
+       subtitle = "per 1,000 females in age group 15–19 years",
+       caption = "Data Source: Centers for Disease Control and Prevention") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        legend.position = "none")
+
+```
+
+
+```{r}
+sessionInfo()
+```
