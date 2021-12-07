@@ -66,7 +66,6 @@ dplus$rating <- factor(
   ordered = TRUE
 )
 
-#class(dplus$date_added)
 ```
 
 #### Dataset #2
@@ -158,31 +157,6 @@ ggplot(rating_clean, aes(rating)) +
 Use one of the sets that contains data about the TV shows available on various streaming services to compare the quantity of Disney's TV show offerings to the quantity of offerings on other streaming services. Use a plot of your choice to enhance the effectiveness/appearance of the plot.
 
 ```{r}
-
-#
-# ###  Compare the QUALITY of Disney+ to other offerings
-
-strmtv_num <- strmtv_long %>%
-  mutate(
-    Rotten = as.numeric(sub(x = strmtv_long$`Rotten Tomatoes`, "/.*", "")),
-    IMDb_num = ifelse(is.na(IMDb), NA, as.numeric(sub(x = strmtv_long$IMDb, "/.*", "")) * 10),
-    Critics = ifelse(is.na(IMDb), Rotten, (Rotten + IMDb_num) / 2)
-  )
-
-ggplot(strmtv_num, aes(Service, Critics, fill = Service)) +
-  geom_violin(bw = 2, scale = "count") +
-  scale_fill_manual(
-      breaks = c("Disney+", "Hulu", "Netflix", "Prime Video"),
-      values = c("darkorchid2", "green3", "firebrick2", "dodgerblue")) +
-  scale_y_continuous(
-    n.breaks = 5, 
-    minor_breaks = seq(0, 100, 5),
-    limits = c(0, 100)) +
-  labs(title = "Quality of TV Shows on Selected Streaming Services",
-       x = "Number of Programs (width of plot)",
-       y = "Average % Positive Critical Reviews")
-#
-# ###  Compare the QUANTITY of Disney+ to other offerings
 
 ggplot(strmtv_long, aes(Service, fill = Service)) +
   geom_bar() +

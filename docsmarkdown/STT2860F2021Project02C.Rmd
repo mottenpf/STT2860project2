@@ -21,8 +21,6 @@ if (!require("gganimate")) install.packages("gganimate")
 library(gganimate)
 if (!require("transformr")) install.packages("transformr")
 library(transformr)
-if (!require("ggbeeswarm")) install.packages("ggbeeswarm")
-library(ggbeeswarm)
 if (!require("plotly")) install.packages("plotly")
 library(plotly)
 if (!require("kableExtra")) install.packages("kableExtra")
@@ -98,54 +96,6 @@ bills_rex <- bills_red %>%
 
 ```
 
-```{r exploratory plotting}
-
-
-# ggplot(bills_red, aes(x = Industry, fill = Industry)) +
-#     geom_bar()
-# 
-# ggplot(bills, aes(x = Industry, fill = Industry)) +
-#     geom_bar() +
-#     coord_flip()
-# 
-# ggplot(bills_ex, aes(Industry, Sum, fill = Industry)) +
-#     stat_summary(geom="bar", position = "stack") +
-#     xlab("Sector") +
-#     coord_flip()
-# 
-# ggplot(bills_rex, aes(Industry, Sum, fill = Industry)) +
-#     stat_summary(geom="bar", position = "stack") +
-#     xlab("Sector")
-# 
-# 
-# 
-# glimpse(strmtv_long)
-# plot(bills, aes(LastChange_Bil, Total_Net_Worth_Bil, color = Country)) +
-#     geom_point() +
-#     scale_x_continuous(n.breaks = 10) +
-#     scale_y_continuous(n.breaks = 10) 
-
-# ggplot(bills_red,
-#        aes(
-#          x = 1,
-#          y = LastChange_Prop,
-#          color = Industry,
-#          size = Total_Net_Worth_Bil
-#        )) +
-#   geom_point(position = jitter, alpha = 0.8) +
-#   scale_size(range = c(0, 20))
-# 
-# ggplot(bills_red,
-#        aes(
-#          x = 1,
-#          y = LastChange_Coef,
-#          color = Industry,
-#          size = Total_Net_Worth_Bil
-#        )) +
-#   geom_point(position = jitter) +
-#   scale_size(range = c(0, 20))
-
-```
 
 ```{r billionaires_infographic}
 
@@ -182,35 +132,6 @@ p <- ggplot(bills_red,
 
 
  * In a few sentences, explain something about what your plot shows.
-
-```{r teendelta}
-
-# teenNC_wide <- teenNC %>% 
-#   select(-c("LCL", "UCL")) %>%
-#   pivot_wider(names_from = year, names_prefix = "births_", values_from = birth_rate) %>%
-#   mutate(births_delta = births_2018 - births_2003,
-#          birth_incr = ifelse(births_delta >= 0, births_delta, NA))
-  
-```
-<<<<<<< HEAD
-=======
-```{r}
-teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
-  mutate(subregion = tolower(county), # to match county map data
-         year = as.integer(year)) # to make the animation labels whole numbers
-str(teenNC)
-
-teenNC_wide <- teenNC %>% 
-  select(-c("LCL", "UCL")) %>%
-  pivot_wider(names_from = year, names_prefix = "births_", values_from = birth_rate) %>%
-  mutate(births_delta = births_2018 - births_2003,
-         birth_incr = ifelse(births_delta >= 0, births_delta, NA))
-  
-teenNC_wide
-```
-
-### County Data from Maps Package
->>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
 
 
 ```{r mapjoin} 
@@ -268,7 +189,6 @@ schoolsNC <- c("Appalachian State University",
 "Winston-Salem State University")
 
 ipedsNC <- ipeds %>%
-<<<<<<< HEAD
   filter (
     # lat < 36.5,
     # lng < -75.554359,
@@ -279,29 +199,14 @@ ipedsNC <- ipeds %>%
   )
 
 print(ipedsNC)
-=======
-  filter (lat < 36.5,
-          lng < -75.554359,
-          lat > 33.888967,
-          lng > -84.321449, 
-          sector_label == "Public",
-           name %in% schoolsNC) %>%
-  mutate (nah = NA)
 
-ipedsNC
-
->>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
 ```
 
 
 
 ```{r}
-<<<<<<< HEAD
+
 teen_anim <- mapdata %>%
-=======
-mapdata %>%
->>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
-#  filter(year == "2003") %>%                       fill = birth_rate),
    ggplot() +
    geom_polygon(aes(x = long, 
                     y = lat, 
@@ -310,12 +215,8 @@ mapdata %>%
                 color = "black") +
   coord_map() +
   scale_fill_gradient2(low = "white", mid = "lavender", high = "red", midpoint = 30) +
-<<<<<<< HEAD
+
   transition_states(year, transition_length = 0, state_length = 2, wrap = TRUE) +           #
-=======
-  transition_states(year, transition_length = 1, state_length = 2, wrap = TRUE) +           #
-#  transition_time(year) +                                                                  #
->>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
   geom_point(data = ipedsNC, 
              aes(lng, lat, color = "Location of UNC Campuses"),
              size = 1.5) +
@@ -328,43 +229,8 @@ mapdata %>%
          color = NULL,
          caption = "Data Source: Centers for Disease Control and Prevention") +
   no_axes_theme
-<<<<<<< HEAD
 
 animate(teen_anim, duration = 60, end_pause = 20, start_pause = 8)
-
-# animate(a, 
-#         duration = 16, # = 16 years + 20 on 2018 + = 16 seconds
-#         fps  =  [pick how smooth you want],
-#         nframes = [...or pick it here])
-=======
->>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
-```
-
-
-```{r}
-teen <- readRDS("../dataprocessed/CDCteenbirthrate.rds")
-str(teen)
-```
-```{r}
-teen_vis <- teen %>%
-  filter(state == "North Carolina",
-         county == "Watauga")
-
-ggplot(teen_vis, aes(year, birth_rate)) +
-    stat_smooth(alpha = 0.2) +
-  geom_line() +
-  scale_y_continuous(limits = c(0, 12)) +
-  labs(title = "Change in Teen Birth Rates",
-       subtitle = "per 1,000 females in age group 15–19 years",
-       caption = "Data Source: Centers for Disease Control and Prevention") +
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5))
-
-```
-
-
-
-```{r othervis}
 
 ```
 
