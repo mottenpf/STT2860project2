@@ -55,6 +55,12 @@ library(waffle)
 
 ```{r}
 
+load("../dataprocessed/streamingcontent.Rdata")
+
+glimpse(dplus)
+glimpse(strmtv)
+glimpse(strmtv_long)
+
 #
 # ###  Compare the QUALITY of Disney+ to other offerings
 
