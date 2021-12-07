@@ -13,7 +13,7 @@ output:
 
 ### Packages Used
 
-```{r loadpackages, collapse = TRUE}
+```{r loadpackages,}
 library(tidyverse)
 library(maps)
 library(knitr)
@@ -30,7 +30,7 @@ library(kableExtra)
 
 ### Datasets Used
 
-```{r loaddata, collapse = TRUE}
+```{r loaddata,}
 bills <- read_csv("../dataraw/billionaires_2021_10_31.csv")
 
 glimpse(bills)
@@ -42,32 +42,17 @@ glimpse(ipeds)
 teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
   mutate(subregion = tolower(county), # to match county map data
          year = as.integer(year)) # to make the animation labels whole numbers
-str(teenNC)
+glimpse(teenNC)
 
 ### County Data from Maps Package
 countymapNC <- map_data("county") %>% 
   filter(region == "north carolina") %>% 
   select(-region) # not needed since it will be all NC data now
-str(countymapNC)
+glimpse(countymapNC)
 
 ```
 
 ```{r exploration, collapse = TRUE}
-
-# bills[bills == "$121B"] <- NA  # Check that is.na check is checking correctly.  
-#   ###
-#   ###  Re-run read_cvs to refresh dataframe after testing
-#   ###
-#
-# for (i in 1:ncol(bills)) {
-#   print(which(is.na(bills[ ,i])))
-# }
-
-
-# ggplot(bills, aes(LastChange_Bil, Total_Net_Worth_Bil, color = Industry)) +
-#     geom_point() +
-#     scale_x_continuous(trans = "log2") +
-#     scale_y_continuous(trans = "log2") 
 
 bills_ex <- bills %>%
   group_by(Industry) %>%
@@ -122,7 +107,7 @@ p <- ggplot(bills_red,
       title = "Year-to-Date Change in Net Worth of 500 Wealthiest Individuals",
       subtitle = "as of October 31st, 2021",
       x = NULL,
-      y = "Number of Families With x Many Children"
+      y = "Change in Fortune, Billions of Dollars"
    ) + 
   theme(axis.ticks.x = element_blank(),
         axis.text.x = element_blank())
@@ -172,32 +157,8 @@ schoolsNC <- c(
   "Winston-Salem State University"
 )
 
-schoolsNC <- c("Appalachian State University",
-"East Carolina University",
-"Elizabeth City State University",
-"Fayetteville State University",
-"North Carolina A & T State University",
-"North Carolina Central University",
-"North Carolina State University at Raleigh",
-"University of North Carolina at Asheville",
-"University of North Carolina at Chapel Hill",
-"University of North Carolina at Charlotte",
-"University of North Carolina at Greensboro",
-"University of North Carolina at Pembroke",
-"University of North Carolina Wilmington",
-"University of North Carolina School of the Arts",
-"Western Carolina University",
-"Winston-Salem State University")
-
 ipedsNC <- ipeds %>%
-  filter (
-    # lat < 36.5,
-    # lng < -75.554359,
-    # lat > 33.888967,
-    # lng > -84.321449,
-    # sector_label == "Public",
-    name %in% schoolsNC
-  )
+  filter (name %in% schoolsNC)
 
 print(ipedsNC)
 
