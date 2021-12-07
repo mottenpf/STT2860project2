@@ -192,6 +192,25 @@ p <- ggplot(bills_red,
 #          birth_incr = ifelse(births_delta >= 0, births_delta, NA))
   
 ```
+<<<<<<< HEAD
+=======
+```{r}
+teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
+  mutate(subregion = tolower(county), # to match county map data
+         year = as.integer(year)) # to make the animation labels whole numbers
+str(teenNC)
+
+teenNC_wide <- teenNC %>% 
+  select(-c("LCL", "UCL")) %>%
+  pivot_wider(names_from = year, names_prefix = "births_", values_from = birth_rate) %>%
+  mutate(births_delta = births_2018 - births_2003,
+         birth_incr = ifelse(births_delta >= 0, births_delta, NA))
+  
+teenNC_wide
+```
+
+### County Data from Maps Package
+>>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
 
 
 ```{r mapjoin} 
@@ -231,7 +250,25 @@ schoolsNC <- c(
   "Winston-Salem State University"
 )
 
+schoolsNC <- c("Appalachian State University",
+"East Carolina University",
+"Elizabeth City State University",
+"Fayetteville State University",
+"North Carolina A & T State University",
+"North Carolina Central University",
+"North Carolina State University at Raleigh",
+"University of North Carolina at Asheville",
+"University of North Carolina at Chapel Hill",
+"University of North Carolina at Charlotte",
+"University of North Carolina at Greensboro",
+"University of North Carolina at Pembroke",
+"University of North Carolina Wilmington",
+"University of North Carolina School of the Arts",
+"Western Carolina University",
+"Winston-Salem State University")
+
 ipedsNC <- ipeds %>%
+<<<<<<< HEAD
   filter (
     # lat < 36.5,
     # lng < -75.554359,
@@ -242,12 +279,28 @@ ipedsNC <- ipeds %>%
   )
 
 print(ipedsNC)
+=======
+  filter (lat < 36.5,
+          lng < -75.554359,
+          lat > 33.888967,
+          lng > -84.321449, 
+          sector_label == "Public",
+           name %in% schoolsNC) %>%
+  mutate (nah = NA)
+
+ipedsNC
+
+>>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
 ```
 
 
 
 ```{r}
+<<<<<<< HEAD
 teen_anim <- mapdata %>%
+=======
+mapdata %>%
+>>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
 #  filter(year == "2003") %>%                       fill = birth_rate),
    ggplot() +
    geom_polygon(aes(x = long, 
@@ -257,7 +310,12 @@ teen_anim <- mapdata %>%
                 color = "black") +
   coord_map() +
   scale_fill_gradient2(low = "white", mid = "lavender", high = "red", midpoint = 30) +
+<<<<<<< HEAD
   transition_states(year, transition_length = 0, state_length = 2, wrap = TRUE) +           #
+=======
+  transition_states(year, transition_length = 1, state_length = 2, wrap = TRUE) +           #
+#  transition_time(year) +                                                                  #
+>>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
   geom_point(data = ipedsNC, 
              aes(lng, lat, color = "Location of UNC Campuses"),
              size = 1.5) +
@@ -270,6 +328,7 @@ teen_anim <- mapdata %>%
          color = NULL,
          caption = "Data Source: Centers for Disease Control and Prevention") +
   no_axes_theme
+<<<<<<< HEAD
 
 animate(teen_anim, duration = 60, end_pause = 20, start_pause = 8)
 
@@ -277,6 +336,8 @@ animate(teen_anim, duration = 60, end_pause = 20, start_pause = 8)
 #         duration = 16, # = 16 years + 20 on 2018 + = 16 seconds
 #         fps  =  [pick how smooth you want],
 #         nframes = [...or pick it here])
+=======
+>>>>>>> b8d4198090d4aeb98369195463d22ebab0a1a09d
 ```
 
 
