@@ -202,15 +202,15 @@ ggplot(strmtv_long, aes(Service, fill = Service)) +
 
 **ANSWER**
 
-1)
+1)  Disney+ has more than 2 movies for every TV show (although the TV shows presumably have more episodes)
 
 2)
 
 3)
 
-4)
+4)  Overall, the critical rankings of shows on Disney+ is similar to that of other streaming services:  mostly average, with more really bad shows than really good ones
 
-5)  Prime video has about as many offerings with terrible reviews as Disney + has in their entire TV catalog.
+5)  Prime video has nearly as many offerings with terrible reviews as Disney + has in their entire TV catalog.
 
 **Question 2:** What other data would you like to have, or which existing variables would you like to see transformed, if you were going to do further explorations or visualizations? Give at least two examples.
 

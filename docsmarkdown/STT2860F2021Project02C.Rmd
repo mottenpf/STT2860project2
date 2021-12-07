@@ -13,10 +13,14 @@ output:
 
 ### Packages Used
 
-```{r loadpackages}
+```{r loadpackages, collapse = TRUE}
 library(tidyverse)
 library(maps)
 library(knitr)
+if (!require("gganimate")) install.packages("gganimate")
+library(gganimate)
+if (!require("transformr")) install.packages("transformr")
+library(transformr)
 if (!require("ggbeeswarm")) install.packages("ggbeeswarm")
 library(ggbeeswarm)
 if (!require("plotly")) install.packages("plotly")
@@ -28,16 +32,29 @@ library(kableExtra)
 
 ### Datasets Used
 
-```{r loaddata}
+```{r loaddata, collapse = TRUE}
 bills <- read_csv("../dataraw/billionaires_2021_10_31.csv")
 
 glimpse(bills)
 is_tibble(bills)
 
+ipeds <- read_csv("https://assets.datacamp.com/production/repositories/1942/datasets/18a000cf70d2fe999c6a6f2b28a7dc9813730e74/ipeds.csv")
+glimpse(ipeds)
+
+teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
+  mutate(subregion = tolower(county), # to match county map data
+         year = as.integer(year)) # to make the animation labels whole numbers
+str(teenNC)
+
+### County Data from Maps Package
+countymapNC <- map_data("county") %>% 
+  filter(region == "north carolina") %>% 
+  select(-region) # not needed since it will be all NC data now
+str(countymapNC)
 
 ```
 
-```{r exploration}
+```{r exploration, collapse = TRUE}
 
 # bills[bills == "$121B"] <- NA  # Check that is.na check is checking correctly.  
 #   ###
@@ -166,35 +183,24 @@ p <- ggplot(bills_red,
 
  * In a few sentences, explain something about what your plot shows.
 
-```{r otherdata}
+```{r teendelta}
 
-ipeds <- read_csv("https://assets.datacamp.com/production/repositories/1942/datasets/18a000cf70d2fe999c6a6f2b28a7dc9813730e74/ipeds.csv")
-glimpse(ipeds)
-
-```
-```{r}
-teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
-  mutate(subregion = tolower(county)) # to match county map data
-str(teenNC)
+# teenNC_wide <- teenNC %>% 
+#   select(-c("LCL", "UCL")) %>%
+#   pivot_wider(names_from = year, names_prefix = "births_", values_from = birth_rate) %>%
+#   mutate(births_delta = births_2018 - births_2003,
+#          birth_incr = ifelse(births_delta >= 0, births_delta, NA))
+  
 ```
 
-### County Data from Maps Package
 
-```{r}
-countymapNC <- map_data("county") %>% 
-  filter(region == "north carolina") %>% 
-  select(-region) # not needed since it will be all NC data now
-str(countymapNC)
-```
-
-```{r} 
+```{r mapjoin} 
 mapdata <- countymapNC %>% 
   full_join(teenNC, by = "subregion")
-print(mapdata)
 ```
 
 
-```{r, echo = FALSE}
+```{r noaxes, echo = FALSE}
 no_axes_theme <- theme(
   axis.text = element_blank(),
   axis.line = element_blank(),
@@ -204,39 +210,73 @@ no_axes_theme <- theme(
   axis.title = element_blank())
 ```
 
-```{r}
+```{r process_schools}
+
+schoolsNC <- c(
+  "Appalachian State University",
+  "East Carolina University",
+  "Elizabeth City State University",
+  "Fayetteville State University",
+  "North Carolina A & T State University",
+  "North Carolina Central University",
+  "North Carolina State University at Raleigh",
+  "University of North Carolina at Asheville",
+  "University of North Carolina at Chapel Hill",
+  "University of North Carolina at Charlotte",
+  "University of North Carolina at Greensboro",
+  "University of North Carolina at Pembroke",
+  "University of North Carolina Wilmington",
+  "University of North Carolina School of the Arts",
+  "Western Carolina University",
+  "Winston-Salem State University"
+)
 
 ipedsNC <- ipeds %>%
-  filter (lat < 36.5,
-          lng < -75.554359,
-          lat > 33.888967,
-          lng > -84.321449, 
-          sector_label == "Public")
+  filter (
+    # lat < 36.5,
+    # lng < -75.554359,
+    # lat > 33.888967,
+    # lng > -84.321449,
+    # sector_label == "Public",
+    name %in% schoolsNC
+  )
 
-glimpse(ipedsNC)
-
+print(ipedsNC)
 ```
 
 
 
 ```{r}
-mapdata %>% 
-  filter(year == 2003) %>% 
-  ggplot() +
-  geom_polygon(aes(x = long, 
-                   y = lat, 
-                   group = group, 
-                   fill = birth_rate),
-               color = "black") +
+teen_anim <- mapdata %>%
+#  filter(year == "2003") %>%                       fill = birth_rate),
+   ggplot() +
+   geom_polygon(aes(x = long, 
+                    y = lat, 
+                    group = group, 
+                    fill = birth_rate),
+                color = "black") +
   coord_map() +
-  scale_fill_gradient(low = "white", high = "purple") +
-  labs(title = "2003 Teen Birth Rates in North Carolina",
-       subtitle = "per 1,000 females in age group 15–19 years",
-       caption = "Data Source: Centers for Disease Control and Prevention") +
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5)) +
-  geom_point(data = ipedsNC, aes(lng, lat, color =sector_label), size = 0.7) #+
- # no_axes_theme
+  scale_fill_gradient2(low = "white", mid = "lavender", high = "red", midpoint = 30) +
+  transition_states(year, transition_length = 0, state_length = 2, wrap = TRUE) +           #
+  geom_point(data = ipedsNC, 
+             aes(lng, lat, color = "Location of UNC Campuses"),
+             size = 1.5) +
+    theme(plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5)) +
+    scale_colour_manual(values = "black", na.value = "black") +
+    labs(title = "Change in Teen Birth Rates in North Carolina",
+         subtitle = "Year: {closest_state} , per 1,000 females in age group 15–19 years",     #
+         fill = "Teen Birth Rate",
+         color = NULL,
+         caption = "Data Source: Centers for Disease Control and Prevention") +
+  no_axes_theme
+
+animate(teen_anim, duration = 60, end_pause = 20, start_pause = 8)
+
+# animate(a, 
+#         duration = 16, # = 16 years + 20 on 2018 + = 16 seconds
+#         fps  =  [pick how smooth you want],
+#         nframes = [...or pick it here])
 ```
 
 
@@ -250,6 +290,7 @@ teen_vis <- teen %>%
          county == "Watauga")
 
 ggplot(teen_vis, aes(year, birth_rate)) +
+    stat_smooth(alpha = 0.2) +
   geom_line() +
   scale_y_continuous(limits = c(0, 12)) +
   labs(title = "Change in Teen Birth Rates",
