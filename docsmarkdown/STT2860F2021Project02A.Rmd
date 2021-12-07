@@ -47,7 +47,7 @@ glimpse(data_sub)
 
 ### Collaborators
 
-ADD NAMES HERE OR WRITE "None"
+None
 
 <hr>
 
@@ -235,9 +235,7 @@ ggplot(family_count, aes(num_children)) +
    geom_bar(
       color = "red",
       fill = "red4",
-      width = 0.875,
-      xlim = c(1, 15),
-      ylim = c(0, 32)
+      width = 0.875
    ) +
    scale_x_continuous(n.breaks = 20, minor_breaks = NULL, expand = c(0, 0), limits = c(0, 20)) +
    scale_y_continuous(n.breaks = 7, minor_breaks = c(0:35), expand = c(0, 0), limits = c(0, 35)) +

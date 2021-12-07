@@ -176,21 +176,21 @@ ggplot(strmtv_long, aes(Service, fill = Service)) +
 
 **ANSWER**
 
-1)  Disney+ has more than 2 movies for every TV show (although the TV shows presumably have more episodes)
+1)  The earliest television programs on Disney+ came out in 1955.
 
-2)
+2)  Disney+ has more than 2 movies for every TV show (although the data doesn't show whether TV shows have more episodes).
 
-3)
+3)  Television shows on Disney Plus are never rated G or PG-13, but movies can be of any TV-rating.
 
-4)  Overall, the critical rankings of shows on Disney+ is similar to that of other streaming services:  mostly average, with more really bad shows than really good ones
+4)  The number of offerings on Disney+ is dwarfed by the major streaming services' catalogs.
 
-5)  Prime video has nearly as many offerings with terrible reviews as Disney + has in their entire TV catalog.
+5)  (See Appendix B) Overall, the critical rankings of shows on Disney+ is similar to that of other streaming services:  mostly average, with more really bad shows than really good ones.  Prime video has nearly as many offerings with terrible reviews as Disney + has in their entire TV catalog.
 
 **Question 2:** What other data would you like to have, or which existing variables would you like to see transformed, if you were going to do further explorations or visualizations? Give at least two examples.
 
 **ANSWER**
 
-ERASE THIS TEXT AND ANSWER QUESTION HERE
+The number of hours of content, broken down by type, would be really useful for making more accurate comparisons between streaming services and between movies and TV shows offered on each service.  I would also like data on genre to make comparisons between services.  A separate category for animated vs live-action would also be interesting, although these are not mutually exclusive because some films blur the line between the two.  These both/and programs, however, make up a small portion of the total dataset, so they probably won't badly distort comparisons, but it would be something to watch out for when assigning proportions that assume an either/or distinction, especially if they are over-represented in certain genre or ratings categories.
 
 ***
 ```{r}

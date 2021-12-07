@@ -7,7 +7,18 @@ output:
     theme: cosmo
     highlight: textmate
     code_folding: hide
+    toc: true
+    toc_depth: 2
+    toc_float: false
+    
 ---
+
+## Author's Notes:
+
+These are bits I wrote in the process of completing the assignment which did not make the final cut.  Some of them don't work, some don't show what they're supposed to show, and others are simply intermediate steps in developing the visualizations used in earlier pages.  Some of the code, however, was recycled into the final versions.  
+
+The most recent versions of exploratory visualizations are included here for future reference.
+
 
 ## Packages Used
 
@@ -107,10 +118,6 @@ for (i in 1:ncol(bills)) {
   print(which(is.na(bills[ ,i])))
 }
 
-ggplot(bills, aes(LastChange_Bil, Total_Net_Worth_Bil, color = Industry)) +
-    geom_point() +
-    scale_x_continuous(trans = "log2") +
-    scale_y_continuous(trans = "log2")
 
 bills_ex <- bills %>%
   group_by(Industry) %>%
@@ -137,6 +144,11 @@ bills_rex <- bills_red %>%
   group_by(Industry) %>%
   summarise(Sum = sum(`Net Worth (Billions)`))
 
+
+ggplot(bills, aes(LastChange_Bil, Total_Net_Worth_Bil, color = Industry)) +
+    geom_point() #+
+#    scale_x_continuous(trans = "log2") +
+#    scale_y_continuous(trans = "log2")
 ```
 
 ```{r exploratory plotting}
@@ -148,6 +160,8 @@ ggplot(bills_red, aes(x = Industry, fill = Industry)) +
 ggplot(bills, aes(x = Industry, fill = Industry)) +
     geom_bar() +
     coord_flip()
+
+### Might not be graphing what I think they're graphing?
 
 ggplot(bills_ex, aes(Industry, Sum, fill = Industry)) +
     stat_summary(geom="bar", position = "stack") +
@@ -261,7 +275,7 @@ ggplot(teen_vis, aes(year, birth_rate)) +
     stat_smooth(alpha = 0.2) +
   geom_line() +
   scale_y_continuous(limits = c(0, 12)) +
-  labs(title = "Change in Teen Birth Rates",
+  labs(title = "Change in Teen Birth Rates, Watauga County NC",
        subtitle = "per 1,000 females in age group 15–19 years",
        caption = "Data Source: Centers for Disease Control and Prevention") +
   theme(plot.title = element_text(hjust = 0.5),
@@ -273,7 +287,7 @@ teen_vis2 <- teen %>%
 
 ggplot(teen_vis2, aes(year, birth_rate, color = county)) +
   geom_line() +
-  labs(title = "Change in Teen Birth Rates",
+  labs(title = "Change in Teen Birth Rates NC Counties",
        subtitle = "per 1,000 females in age group 15–19 years",
        caption = "Data Source: Centers for Disease Control and Prevention") +
   theme(plot.title = element_text(hjust = 0.5),

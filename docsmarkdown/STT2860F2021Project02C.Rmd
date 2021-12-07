@@ -110,12 +110,13 @@ p <- ggplot(bills_red,
          text = Name
        )) +
   geom_point(position = jitter) +
-  geom_point(shape = 1, colour = "gray50", alpha = .2, position = jitter)+ 
+  geom_point(shape = 1, colour = "gray60", alpha = .2, position = jitter)+ 
   geom_hline(yintercept=0) +
   scale_color_manual(
       breaks = c("Technology", "Industrial", "Finance", "Diversified", "Consumer", "Other"),
       values = c("#AA4499", "#882255", "#117733", "#DDCC77", "#CC6677", "#88CCEE")) +
   scale_y_continuous(n.breaks = 18, minor_breaks = seq(-20, 20, 2)) +
+  scale_x_continuous(breaks = NULL, minor_breaks = NULL) +
   scale_size(range = c(0, 20)) +
   labs(
       title = "Year-to-Date Change in Net Worth of 500 Wealthiest Individuals",
@@ -131,7 +132,7 @@ p <- ggplot(bills_red,
 ```
 
 
- * In a few sentences, explain something about what your plot shows.
+This plot shows which billionaires have been making (and losing) the most money so far this year, color-coded by sector of the economy.  The first thing which jumps out is how not only does the tech sector make up an outsized proportion of the wealth of the world's top billionaires, it is also includes nearly all of the top 10 wealthiest individuals.  By contrast, the catch-all category "other" includes more total wealth, but is made up of numerous smaller fortunes.  It's also immediately apparent that the individuals making the most money this year are mostly the ones who already have the most money, and again, most of them are in the tech sector.  Finally, by hovering over each balloon, it is possible to see the name of the person.  By this, we can see just how rapidly Elon Musk's fortune is ballooning this year, vastly outstripping all of his closest competitors. 
 
 
 ```{r mapjoin} 
@@ -235,8 +236,9 @@ animate(teen_anim, duration = 60, end_pause = 20, start_pause = 8)
 ```
 
 
-   * Explain why you chose the dataset you did---what interested you?
-   * In a few sentences, explain something about what your plot shows.
+I was curious if the location of universities was correlated with birth rates in people under 20 years old.  Of course, the locations of universities are themselves correlated with urban centers and higher income areas, but there does appear to be a loose correlation.  I also wanted to show the change in teen birth rates over time.
+
+Similar to national and global trends, teen birth rates have been generally decreasing across the state over the past two decades.  The map shows that areas with the highest rates in 2003 have the most dramatic reductions, but even areas with relatively low rates have seen decreases.  Only one county in North Carolina has seen a net increase in the teen birth rate.
 
 
 ```{r}
