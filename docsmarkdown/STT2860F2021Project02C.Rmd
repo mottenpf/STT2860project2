@@ -17,6 +17,10 @@ output:
 library(tidyverse)
 library(maps)
 library(knitr)
+if (!require("gganimate")) install.packages("gganimate")
+library(gganimate)
+if (!require("transformr")) install.packages("transformr")
+library(transformr)
 if (!require("ggbeeswarm")) install.packages("ggbeeswarm")
 library(ggbeeswarm)
 if (!require("plotly")) install.packages("plotly")
@@ -174,8 +178,17 @@ glimpse(ipeds)
 ```
 ```{r}
 teenNC <- readRDS("../dataprocessed/CDCteenbirthrateNC.rds") %>% 
-  mutate(subregion = tolower(county)) # to match county map data
+  mutate(subregion = tolower(county), # to match county map data
+         year = as.integer(year)) # to make the animation labels whole numbers
 str(teenNC)
+
+teenNC_wide <- teenNC %>% 
+  select(-c("LCL", "UCL")) %>%
+  pivot_wider(names_from = year, names_prefix = "births_", values_from = birth_rate) %>%
+  mutate(births_delta = births_2018 - births_2003,
+         birth_incr = ifelse(births_delta >= 0, births_delta, NA))
+  
+teenNC_wide
 ```
 
 ### County Data from Maps Package
@@ -206,37 +219,63 @@ no_axes_theme <- theme(
 
 ```{r}
 
+schoolsNC <- c("Appalachian State University",
+"East Carolina University",
+"Elizabeth City State University",
+"Fayetteville State University",
+"North Carolina A & T State University",
+"North Carolina Central University",
+"North Carolina State University at Raleigh",
+"University of North Carolina at Asheville",
+"University of North Carolina at Chapel Hill",
+"University of North Carolina at Charlotte",
+"University of North Carolina at Greensboro",
+"University of North Carolina at Pembroke",
+"University of North Carolina Wilmington",
+"University of North Carolina School of the Arts",
+"Western Carolina University",
+"Winston-Salem State University")
+
 ipedsNC <- ipeds %>%
   filter (lat < 36.5,
           lng < -75.554359,
           lat > 33.888967,
           lng > -84.321449, 
-          sector_label == "Public")
+          sector_label == "Public",
+           name %in% schoolsNC) %>%
+  mutate (nah = NA)
 
-glimpse(ipedsNC)
+ipedsNC
 
 ```
 
 
 
 ```{r}
-mapdata %>% 
-  filter(year == 2003) %>% 
-  ggplot() +
-  geom_polygon(aes(x = long, 
-                   y = lat, 
-                   group = group, 
-                   fill = birth_rate),
-               color = "black") +
+mapdata %>%
+#  filter(year == "2003") %>%                       fill = birth_rate),
+   ggplot() +
+   geom_polygon(aes(x = long, 
+                    y = lat, 
+                    group = group, 
+                    fill = birth_rate),
+                color = "black") +
   coord_map() +
-  scale_fill_gradient(low = "white", high = "purple") +
-  labs(title = "2003 Teen Birth Rates in North Carolina",
-       subtitle = "per 1,000 females in age group 15–19 years",
-       caption = "Data Source: Centers for Disease Control and Prevention") +
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(hjust = 0.5)) +
-  geom_point(data = ipedsNC, aes(lng, lat, color =sector_label), size = 0.7) #+
- # no_axes_theme
+  scale_fill_gradient2(low = "white", mid = "lavender", high = "red", midpoint = 30) +
+  transition_states(year, transition_length = 1, state_length = 2, wrap = TRUE) +           #
+#  transition_time(year) +                                                                  #
+  geom_point(data = ipedsNC, 
+             aes(lng, lat, color = "Location of UNC Campuses"),
+             size = 1.5) +
+    theme(plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5)) +
+    scale_colour_manual(values = "black", na.value = "black") +
+    labs(title = "Change in Teen Birth Rates in North Carolina",
+         subtitle = "Year: {closest_state} , per 1,000 females in age group 15–19 years",     #
+         fill = "Teen Birth Rate",
+         color = NULL,
+         caption = "Data Source: Centers for Disease Control and Prevention") +
+  no_axes_theme
 ```
 
 
@@ -250,6 +289,7 @@ teen_vis <- teen %>%
          county == "Watauga")
 
 ggplot(teen_vis, aes(year, birth_rate)) +
+    stat_smooth(alpha = 0.2) +
   geom_line() +
   scale_y_continuous(limits = c(0, 12)) +
   labs(title = "Change in Teen Birth Rates",
